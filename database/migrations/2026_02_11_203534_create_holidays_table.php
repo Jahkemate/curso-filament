@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('calendar_id');
             $table->foreignId('user_id');
             $table->date('day');
-            $table->enum('type',['decline','appoved','pendig'])->default('pending');
+            $table->enum('type',['decline','approved','pending'])->default('pending');
             $table->timestamps();
         });
     }
