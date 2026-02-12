@@ -23,7 +23,7 @@ class CountryResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'System Management'; // Para hacer un grupo en ls iconos de navegacion del menu lateral (se agregan e los resources)
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-flag';
 
