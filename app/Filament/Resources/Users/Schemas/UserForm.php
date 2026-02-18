@@ -75,8 +75,11 @@ class UserForm
                     ->required(),
                 TextInput::make('postal_code')
                     ->required(),
-
-            ])
+                Select::make('roles')
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->preload()
+            ]),
             ]);
     }
 }

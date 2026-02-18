@@ -20,12 +20,31 @@ class HolidayResource extends Resource
 {
     protected static ?string $model = Holiday::class;
 
+    protected static ?string $navigationLabel = 'Vacaciones';
     protected static string|BackedEnum|null $navigationIcon = Heroicon::CalendarDays;
+
+            //para mstrar el umero de vacaciones pendientes
+            public static function getNavigationBadge(): ?string
+                {
+
+                    return parent::getEloquentQuery()->where('user_id', Auth::user()->id)->where('type', 'pending')->count();
+                }
+            //para cambiar el color del numero
+            public static function getNavigationBadgeColor(): ?string
+                {
+                    return parent::getEloquentQuery()->where('user_id', Auth::user()->id)->where('type', 'pending')->count() > 0 ? 'warning' : 'primary';
+                }
 
         public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->where('user_id', Auth::user()->id);
     }
+
+            //para mostra un mensajeal pasar por el numero de vacaciones pendientes
+            public static function getNavigationBadgeTooltip(): ?string
+                    {
+                        return 'The number of pending holidays ';
+                    }
 
     protected static ?string $recordTitleAttribute = 'Holiday';
 
