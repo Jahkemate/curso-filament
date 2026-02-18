@@ -6,9 +6,12 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use pxlrbt\FilamentExcel\Columns\Column;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class TimesheetsTable
 {
@@ -56,7 +59,20 @@ class TimesheetsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                DeleteBulkAction::make(),
+                    DeleteBulkAction::make(),
+                    ExportBulkAction::make('table')->exports([
+                        ExcelExport::make('table')->fromTable()
+                        ->withFilename('Timesheet_'.date('Y-m-d' . '_export'))
+                        ->withColumns([
+                            Column::make('User'),
+                            Column::make('created_at'),
+                            Column::make('deleted_at'),
+                        ]),
+                        ExcelExport::make('form')->fromForm()
+                        //para ponerele nombre y el tido de archivo a guardar
+                        ->askForFilename()
+                        ->askForWriterType(),
+                    ])
                 ]),
             ]);
     }
