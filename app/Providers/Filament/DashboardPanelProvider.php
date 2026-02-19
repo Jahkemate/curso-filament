@@ -67,6 +67,7 @@ class DashboardPanelProvider extends PanelProvider
                 ->label('Personal')
                 ->url('/personal')
                 ->icon(Heroicon::Cog6Tooth)
-            ]);
+            ])
+            ->databaseNotifications();
     }
 }

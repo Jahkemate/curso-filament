@@ -2,10 +2,12 @@
 
 namespace App\Filament\Personal\Resources\Timesheets\Pages;
 
+use App\Filament\Imports\TimesheetImporter;
 use App\Filament\Personal\Resources\Timesheets\TimesheetsResource;
 use App\Models\Timesheet;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Actions\ImportAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Carbon;
@@ -128,6 +130,11 @@ class ListTimesheets extends ListRecords
                     ->send();
             }),
         CreateAction::make(),
+        ImportAction::make()
+            ->importer(TimesheetImporter::class)
+            ->label("Import")
+            ->color('primary')
+        
            
         ];
     }

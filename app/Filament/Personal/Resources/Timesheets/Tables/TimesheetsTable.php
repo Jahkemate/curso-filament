@@ -64,12 +64,12 @@ class TimesheetsTable
                         ExcelExport::make('table')->fromTable()
                         ->withFilename('Timesheet_'.date('Y-m-d' . '_export'))
                         ->withColumns([
-                            Column::make('User'),
+                            Column::make('user.name'),
                             Column::make('created_at'),
                             Column::make('deleted_at'),
                         ]),
                         ExcelExport::make('form')->fromForm()
-                        //para ponerele nombre y el tido de archivo a guardar
+                        //para ponerele nombre y el tipo de archivo
                         ->askForFilename()
                         ->askForWriterType(),
                     ])

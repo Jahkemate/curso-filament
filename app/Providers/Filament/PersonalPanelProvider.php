@@ -80,6 +80,7 @@ class PersonalPanelProvider extends PanelProvider
                 ->label('Admin')
                 ->url('/admin')
                 ->icon(Heroicon::Cog6Tooth)
-            ]);
+            ])
+            ->databaseNotifications();
     }
 }

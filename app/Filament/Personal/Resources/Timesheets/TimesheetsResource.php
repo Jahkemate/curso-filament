@@ -24,7 +24,7 @@ class TimesheetsResource extends Resource
 
      public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('user_id', Auth::user()->id)->orderBy('id', 'desc');
+        return parent::getEloquentQuery()->where('user_id', Auth::user()->id)->orderBy('day_in', 'desc');
     }
     protected static ?string $recordTitleAttribute = 'Timesheets';
 
