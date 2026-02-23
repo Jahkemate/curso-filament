@@ -7,10 +7,12 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -18,13 +20,9 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\Navigation\NavigationItem;
-use Filament\Support\Icons\Heroicon;
-use Filament\Actions\Action;
-
-use App\Models\Payment;
-
+use Spatie\Permission\Traits\HasRoles;
 
 class PersonalPanelProvider extends PanelProvider
 {
@@ -34,8 +32,8 @@ class PersonalPanelProvider extends PanelProvider
             ->id('personal')
             ->path('personal')
             ->login()
-            ->default()
-            ->colors([
+            ->colors([ // estp de aca me sirve para poder dar un diferente estilo a este panel
+                'primary' => Color::Amber,
                 'danger' => Color::Rose,
                 'gray' => Color::Gray,
                 'info' => Color::Blue,
@@ -50,8 +48,8 @@ class PersonalPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Personal/Widgets'), for: 'App\Filament\Personal\Widgets')
             ->widgets([
-              /*   AccountWidget::class,
-                FilamentInfoWidget::class, */
+                //AccountWidget::class,
+                //FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -67,20 +65,20 @@ class PersonalPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->databaseNotifications()
             ->navigationItems([
-                 NavigationItem::make('BLACKPINK')
-                ->url('https://www.youtube.com/channel/UCOmHUn--16B90oW2L6FRR3A', shouldOpenInNewTab: true)
-                ->icon(Heroicon::MusicalNote)
-                ->sort(3),
+                NavigationItem::make('RMCF')
+                    ->url('https://www.realmadrid.com/landings/copas-de-europa-ganadas/', shouldOpenInNewTab: true)
+                    ->icon(Heroicon::RocketLaunch)
+                    ->sort(3),
             ])
-            
-            //otra forma de hacer un switch panel
+            //Otra forma de switch panel
             ->userMenuItems([
-                MenuItem::make()
-                ->label('Admin')
-                ->url('/admin')
-                ->icon(Heroicon::Cog6Tooth)
-            ])
-            ->databaseNotifications();
+                MenuItem::make( )
+                    ->label('Admin')
+                    ->url('/admin')
+                    ->icon(Heroicon::Cog6Tooth)
+            ]);
+        //->topNavigation(); subir el navbar
     }
 }

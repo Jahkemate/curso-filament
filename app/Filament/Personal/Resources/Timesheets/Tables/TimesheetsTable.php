@@ -6,10 +6,10 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
@@ -19,14 +19,13 @@ class TimesheetsTable
     {
         return $table
             ->columns([
-              TextColumn::make('calendar.name')
+                TextColumn::make('calendar.name') //esto sirve para los campos donde tengo relacion puedo mostrar en vez del id, el nombre ya que ambas cosas estan relacionadas
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('user.name')
+                TextColumn::make('user.id')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('type')
-                    ->searchable()
                     ->searchable(),
                 TextColumn::make('day_in')
                     ->dateTime()
@@ -46,34 +45,35 @@ class TimesheetsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('type')
+                SelectFilter::make('type') //filtrar
                     ->options([
                         'work' => 'Working',
                         'pause' => 'In Pause',
-                     ])
-            ])
-            ->recordActions([ //Esto es para los botones de accion de Editas y Eliminar
-                EditAction::make(),
-                DeleteAction::make(),
+                    ]),
 
+            ])
+            ->recordActions([ //esto es para los botones de editar y borrar
+                EditAction::make(),
+                DeleteAction::make()
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    ExportBulkAction::make('table')->exports([
-                        ExcelExport::make('table')->fromTable()
-                        ->withFilename('Timesheet_'.date('Y-m-d' . '_export'))
-                        ->withColumns([
-                            Column::make('user.name'),
-                            Column::make('created_at'),
-                            Column::make('deleted_at'),
-                        ]),
+                    //Con esto puedo exportar forms, tablas aun no funcionan
+                    ExportBulkAction::make()->exports([
                         ExcelExport::make('form')->fromForm()
-                        //para ponerele nombre y el tipo de archivo
-                        ->askForFilename()
-                        ->askForWriterType(),
+                            ->withFilename('Timesheet_' . date('Y-m-d') . ' _export'),
+                        /*->withColumns([
+                                Column::make('User'),
+                                Column::make('created_at'),
+                                Column::make('deleted_at'),
+                            ]),*/
+                        ExcelExport::make('form2')->fromForm()
+                            //permite seleccionar el tipo de archivo y el nombre de como se quiere exportar
+                            ->askForFilename()
+                            ->askForWriterType(),
                     ])
-                ]),
+                ])
             ]);
     }
 }
