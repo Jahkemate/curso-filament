@@ -67,10 +67,10 @@ class PersonalPanelProvider extends PanelProvider
             ])
             ->databaseNotifications()
             ->navigationItems([
-                NavigationItem::make('RMCF')
-                    ->url('https://www.realmadrid.com/landings/copas-de-europa-ganadas/', shouldOpenInNewTab: true)
-                    ->icon(Heroicon::RocketLaunch)
-                    ->sort(3),
+                NavigationItem::make('BLACKPINK')
+                ->url('https://www.youtube.com/channel/UCOmHUn--16B90oW2L6FRR3A', shouldOpenInNewTab: true)
+                ->icon(Heroicon::MusicalNote)
+                ->sort(3),
             ])
             //Otra forma de switch panel
             ->userMenuItems([
