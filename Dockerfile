@@ -1,29 +1,28 @@
-//FROM node:20-alpine AS assets
-//WORKDIR /app
-//COPY package*.json ./
-//RUN npm ci
+#//FROM node:20-alpine AS assets
+#//WORKDIR /app
+#//COPY package*.json ./
+#//RUN npm ci
 
-//COPY . .
-//RUN  npm run build
+#//COPY . .
+#//RUN  npm run build
 
-//FROM composer:2 AS vendor
-//WORKDIR /app
-//COPY composer.json composer.lock ./
-//RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+#//FROM composer:2 AS vendor
+#//WORKDIR /app
+#//COPY composer.json composer.lock ./
+#//RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
-//FROM dunglas/frankenphp:latest
-//WORKDIR /app
-//RUN apt-get update && apt-get install -y unzip git && rm -rf /var/lib/apt/lists/*
+#//FROM dunglas/frankenphp:latest
+#//WORKDIR /app
+#//RUN apt-get update && apt-get install -y unzip git && rm -rf /var/lib/apt/lists/*
 
-//COPY . .
-//COPY --from=vendor /app/vendor /app/vendor
-//COPY --from=assets /app/public/build /app/public/build
+#//COPY . .
+#//COPY --from=vendor /app/vendor /app/vendor
+#/#/COPY --from=assets /app/public/build /app/public/build
 
-//RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+#//RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-//EXPOSE 8000
-
-//CMD "php","artisan","octane:frankenphp","--host=0.0.0.0","--port=8000","--workers=2","--max-requests=300"
+#//EXPOSE 8000
+## CMD ["php","artisan","octane:frankenphp","--host=0.0.0.0","--port=8000","--workers=2","--max-requests=300"]
 
 ########################################
 # 1️⃣ STAGE - Build de assets (Vite)
