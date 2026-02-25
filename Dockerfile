@@ -33,14 +33,19 @@ RUN apk add --no-cache \
     git \
     curl
 
-# Instalar extensiones necesarias de PHP
+# Dependencias necesarias para intl y zip
+RUN apk add --no-cache icu-dev libzip-dev
+
+# Instalar extensiones PHP
 RUN docker-php-ext-install \
     pdo_mysql \
     mbstring \
     exif \
     pcntl \
     bcmath \
-    gd
+    gd \
+    intl \
+    zip
 
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
