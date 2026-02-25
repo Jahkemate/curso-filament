@@ -6,7 +6,7 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "altwaireb/laravel-countries": "^1.1",
         "altwaireb/laravel-world": "^1.1",
         "barryvdh/laravel-dompdf": "^3.1",
