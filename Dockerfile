@@ -20,7 +20,7 @@ RUN npm run build
 ########################################
 # 2️⃣ STAGE - PHP Production
 ########################################
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # Instalar dependencias del sistema
 RUN apk add --no-cache \
