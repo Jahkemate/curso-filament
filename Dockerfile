@@ -23,7 +23,7 @@
 
 //EXPOSE 8000
 
-//CMD ["php","artisan","octane:frankenphp","--host=0.0.0.0","--port=8000","--workers=2","--max-requests=300"]
+//CMD "php","artisan","octane:frankenphp","--host=0.0.0.0","--port=8000","--workers=2","--max-requests=300"
 
 ########################################
 # 1️⃣ STAGE - Build de assets (Vite)
