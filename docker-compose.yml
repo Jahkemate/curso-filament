@@ -70,7 +70,7 @@ volumes:
   db_data:
   storage_data:
 
-  networks:
-    dokploy-network:
-      external: true
-      name: dokploy-network
+networks:
+  dokploy-network:
+    external: true
+    name: dokploy-network
