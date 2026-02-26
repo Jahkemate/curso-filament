@@ -28,7 +28,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      restart: always
+    restart: always
     env_file:
       - .env
     command: ["php", "artisan queue:work", "--tries=3", "--timeout=120", "--sleep=1"]
