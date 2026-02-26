@@ -153,6 +153,6 @@ RUN mkdir -p storage bootstrap/cache \
 
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD ["sh", "-lc", "export FRANKENPHP_BINARY=$(command -v frankenphp || echo /usr/local/bin/frankenphp); php artisan octane:start --server=frankenphp --host=0.0.0.0 --port=8000"]
+CMD ["sh", "-lc", "export FRANKENPHP_BINARY=$(command -v frankenphp || echo /usr/local/bin/frankenphp); php artisan octane:start --server=frankenphp --host=0.0.0.0 --port=8080"]
