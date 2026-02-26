@@ -14,9 +14,7 @@ services:
     volumes:
       - storage_data:/app/storage
     ports:
-      - "8000:8000"
       - "8080:8080"  # Puerto administrativo
-    command: start --admin-port=8080
     networks:
       - default
       - dokploy-network
@@ -30,8 +28,6 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    env_file:
-      - .env
     command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=120", "--sleep=1"]
     depends_on:
       - db
