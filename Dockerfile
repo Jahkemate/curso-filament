@@ -27,74 +27,125 @@
 ########################################
 # 1️⃣ STAGE - Build de assets (Vite)
 ########################################
-FROM node:20-alpine AS node_builder
+#FROM node:20-alpine AS node_builder
 
-WORKDIR /app
+#WORKDIR /app
 
 # Copiar solo package.json primero (mejor cache)
-COPY package*.json ./
+#COPY package*.json ./
 
-RUN npm install
+#RUN npm install
 
 # Copiar el resto del proyecto
-COPY . .
+#COPY . .
 
 # Compilar assets
-RUN npm run build
+#RUN npm run build
 
 
 ########################################
 # 2️⃣ STAGE - PHP Production
 ########################################
-FROM php:8.4-fpm-alpine
+#FROM php:8.4-fpm-alpine
 
 # Instalar dependencias del sistema
-RUN apk add --no-cache \
-    bash \
-    libpng-dev \
-    libxml2-dev \
-    oniguruma-dev \
-    zip \
-    unzip \
-    git \
-    curl
+#RUN apk add --no-cache \
+    #bash \
+    #libpng-dev \
+    #libxml2-dev \
+    #oniguruma-dev \
+    #zip \
+    #unzip \
+    #git \
+    #curl
 
 # Dependencias necesarias para intl y zip
-RUN apk add --no-cache icu-dev libzip-dev
+#RUN apk add --no-cache icu-dev libzip-dev
 
 # Instalar extensiones PHP
-RUN docker-php-ext-install \
-    pdo_mysql \
-    mbstring \
-    exif \
-    pcntl \
-    bcmath \
-    gd \
-    intl \
-    zip
+#RUN docker-php-ext-install \
+    #pdo_mysql \
+    #mbstring \
+    #exif \
+    #pcntl \
+    #bcmath \
+    #gd \
+    #intl \
+   #zip
 
 # Instalar Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+#COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www
+#WORKDIR /var/www
 
 # Copiar proyecto
-COPY . .
+#COPY . .
 
 # Copiar assets compilados desde node_builder
-COPY --from=node_builder /app/public/build ./public/build
+#COPY --from=node_builder /app/public/build ./public/build
 
 # Instalar dependencias PHP (sin dev)
-RUN composer install --no-dev --optimize-autoloader
+#RUN composer install --no-dev --optimize-autoloader
 
 # Optimizar Laravel
-RUN php artisan config:clear && \
-    php artisan route:clear && \
-    php artisan view:clear
+#RUN php artisan config:clear && \
+   #php artisan route:clear && \
+    #php artisan view:clear
 
 # Permisos correctos
-RUN chown -R www-data:www-data storage bootstrap/cache
+#RUN chown -R www-data:www-data storage bootstrap/cache
 
-EXPOSE 8000
+#EXPOSE 8000
 
-CMD ["php-fpm"]
+#CMD ["php-fpm"]
+
+# --- Stage 1: Builder ---
+FROM php:8.4-fpm-alpine AS builder
+
+RUN apk add --no-cache \
+    nodejs npm \
+    icu-dev \
+    libzip-dev \
+    libpng-dev \
+    mysql-dev \
+    zlib-dev
+
+RUN docker-php-ext-install intl zip pcntl pdo_mysql bcmath gd
+
+WORKDIR /app
+COPY . .
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+RUN npm install && npm run build
+
+
+# --- Stage 2: Production ---
+FROM dunglas/frankenphp:1.4-php8.4-alpine
+
+RUN install-php-extensions \
+    pdo_mysql \
+    intl \
+    bcmath \
+    gd \
+    zip \
+    pcntl \
+    posix \
+    exif \
+    opcache \
+    redis
+
+WORKDIR /app
+
+COPY --from=builder /app /app
+
+ENV SERVER_NAME=:80
+ENV APP_RUNTIME=Laravel\Octane\FrankenPhp\Runtime
+
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+
+EXPOSE 80
+
+CMD ["php", "artisan", "octane:start", "--server=frankenphp", "--host=0.0.0.0", "--port=80"]
