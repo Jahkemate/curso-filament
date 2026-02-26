@@ -61,7 +61,8 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 5s
       retries: 10
-      networks:
+      
+    networks:
         - default
 
 volumes:
