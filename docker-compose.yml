@@ -4,7 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      restart: always
+
+    restart: always
     env_file:
       - .env
     depends_on:
@@ -31,7 +32,7 @@ services:
     restart: always
     env_file:
       - .env
-    command: ["php", "artisan queue:work", "--tries=3", "--timeout=120", "--sleep=1"]
+    command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=120", "--sleep=1"]
     depends_on:
       - db
       - redis
@@ -70,6 +71,6 @@ volumes:
   storage_data:
 
   networks:
-  dokploy-network:
-    external: true
-    name: dokploy-network
+    dokploy-network:
+      external: true
+      name: dokploy-network
