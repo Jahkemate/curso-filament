@@ -1,10 +1,10 @@
-
 services:
 
   web:
     build:
       context: .
       dockerfile: Dockerfile
+      restart: always
     env_file:
       - .env
     depends_on:
@@ -12,34 +12,43 @@ services:
       - redis
     volumes:
       - storage_data:/app/storage
-    restart: unless-stopped
     ports:
       - "8000:8000"
       - "8080:8080"  # Puerto administrativo
     command: start --admin-port=8080
+    networks:
+      - default
+      - dokploy-network
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+
 
   queue:
     build:
       context: .
       dockerfile: Dockerfile
+      restart: always
     env_file:
       - .env
-    command: php artisan queue:work --tries=3 --timeout=120 --sleep=1
+    command: ["php", "artisan queue:work", "--tries=3", "--timeout=120", "--sleep=1"]
     depends_on:
       - db
       - redis
     volumes:
       - storage_data:/app/storage
-    restart: unless-stopped
-    user: www-data
+    networks:
+      - default
 
   redis:
     image: redis:7-alpine
-    restart: unless-stopped
+    restart: always
+    networks:
+      - default
 
   db:
     image: mysql:8.0
-    restart: unless-stopped
+    restart: always
     environment:
       MYSQL_DATABASE: app
       MYSQL_USER: app
@@ -52,7 +61,14 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 5s
       retries: 10
+      networks:
+        - default
 
 volumes:
   db_data:
   storage_data:
+
+  networks:
+  dokploy-network:
+    external: true
+    name: dokploy-network
