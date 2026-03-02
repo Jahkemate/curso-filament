@@ -1,107 +1,9 @@
-#//FROM node:20-alpine AS assets
-#//WORKDIR /app
-#//COPY package*.json ./
-#//RUN npm ci
-
-#//COPY . .
-#//RUN  npm run build
-
-#//FROM composer:2 AS vendor
-#//WORKDIR /app
-#//COPY composer.json composer.lock ./
-#//RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
-
-#//FROM dunglas/frankenphp:latest
-#//WORKDIR /app
-#//RUN apt-get update && apt-get install -y unzip git && rm -rf /var/lib/apt/lists/*
-
-#//COPY . .
-#//COPY --from=vendor /app/vendor /app/vendor
-#/#/COPY --from=assets /app/public/build /app/public/build
-
-#//RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
-
-#//EXPOSE 8000
-## CMD ["php","artisan","octane:frankenphp","--host=0.0.0.0","--port=8000","--workers=2","--max-requests=300"]
-
-########################################
-# 1️⃣ STAGE - Build de assets (Vite)
-########################################
-#FROM node:20-alpine AS node_builder
-
-#WORKDIR /app
-
-# Copiar solo package.json primero (mejor cache)
-#COPY package*.json ./
-
-#RUN npm install
-
-# Copiar el resto del proyecto
-#COPY . .
-
-# Compilar assets
-#RUN npm run build
-
-
-########################################
-# 2️⃣ STAGE - PHP Production
-########################################
-#FROM php:8.4-fpm-alpine
-
-# Instalar dependencias del sistema
-#RUN apk add --no-cache \
-    #bash \
-    #libpng-dev \
-    #libxml2-dev \
-    #oniguruma-dev \
-    #zip \
-    #unzip \
-    #git \
-    #curl
-
-# Dependencias necesarias para intl y zip
-#RUN apk add --no-cache icu-dev libzip-dev
-
-# Instalar extensiones PHP
-#RUN docker-php-ext-install \
-    #pdo_mysql \
-    #mbstring \
-    #exif \
-    #pcntl \
-    #bcmath \
-    #gd \
-    #intl \
-   #zip
-
-# Instalar Composer
-#COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-#WORKDIR /var/www
-
-# Copiar proyecto
-#COPY . .
-
-# Copiar assets compilados desde node_builder
-#COPY --from=node_builder /app/public/build ./public/build
-
-# Instalar dependencias PHP (sin dev)
-#RUN composer install --no-dev --optimize-autoloader
-
-# Optimizar Laravel
-#RUN php artisan config:clear && \
-   #php artisan route:clear && \
-    #php artisan view:clear
-
-# Permisos correctos
-#RUN chown -R www-data:www-data storage bootstrap/cache
-
-#EXPOSE 8000
-
-#CMD ["php-fpm"]
-
-# --- Stage 1: Builder ---
+# STAGE 1: BUILDER (compila dependencias PHP y frontend)
 FROM php:8.4-fpm-alpine AS builder
 
+# Instalamos dependencias del sistema necesarias para:
+# - Compilar extensiones PHP
+# - Ejecutar npm/vite
 RUN apk add --no-cache \
     nodejs npm \
     icu-dev \
@@ -109,27 +11,38 @@ RUN apk add --no-cache \
     libpng-dev \
     mysql-dev \
     zlib-dev
-
+    
+# Compilamos extensiones PHP requeridas por Laravel y la app
 RUN docker-php-ext-install intl zip pcntl pdo_mysql bcmath gd
 
+# Directorio de trabajo dentro del contenedor Dokploy
 WORKDIR /app
+
+# Copiar el proyecto
 COPY . .
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN mkdir -p \
+    storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/views \
+    bootstrap/cache
 
+# Copiar el binario de Composer e Instalar dependencias PHP (producción)
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+# Instalamos dependencias Node y compilar assets (Vite)
 RUN  if [ -f package-lock.json ]; then npm ci; else npm install; fi \
     && npm run build
 
-
-
-# --- Stage 2: Production ---
+# STAGE 2: PRODUCTION (runtime con FrankenPHP + Octane)
 FROM dunglas/frankenphp:1.4-php8.4-alpine
 
+# Descargar el instalador de extensiones PHP y hacerlo ejecutable
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/install-php-extensions
 RUN chmod +x /usr/local/bin/install-php-extensions
 
+# Instalar las extensiones PHP necesarias para Laravel y la app
 RUN install-php-extensions \
     pdo_mysql \
     redis \
@@ -140,19 +53,25 @@ RUN install-php-extensions \
     exif \
     pcntl \
     opcache
-
+ 
 WORKDIR /app
 
+# Copiamos la aplicación ya construida desde el stage builder (incluye vendor y build de Vite)
 COPY --from=builder /app /app
 
-ENV SERVER_NAME=:80
+# Variable usada por FrankenPHP/Caddy (puerto interno) y se indica que a Laravel que use el runtime de Octane con FrankenPHP
+ENV SERVER_NAME=:8080
 ENV APP_RUNTIME=Laravel\Octane\FrankenPhp\Runtime
 
+# Creamos los directorios de almacenamiento y asignar los permisos necesarios
 RUN mkdir -p storage bootstrap/cache \
     && chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
-
+# Este es el puerto que usara Octane dentro del contenedor
 EXPOSE 8080
 
+## Comando de arranque:
+# - Detecta el binario de FrankenPHP
+# - Inicia Laravel Octane usando FrankenPHP
+# - Escucha en todas las interfaces en el puerto 8080
 CMD ["sh", "-lc", "export FRANKENPHP_BINARY=$(command -v frankenphp || echo /usr/local/bin/frankenphp); php artisan octane:start --server=frankenphp --host=0.0.0.0 --port=8080"]
