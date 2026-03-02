@@ -25,7 +25,7 @@ services:
     restart: always
     command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=120", "--sleep=1",  "--max-time=3600"]
     depends_on:
-       db:
+      db:
         condition: service_healthy
       redis:
         condition: service_healthy
