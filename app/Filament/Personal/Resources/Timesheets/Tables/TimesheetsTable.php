@@ -61,14 +61,31 @@ class TimesheetsTable
                     DeleteBulkAction::make(),
                     //Con esto puedo exportar forms, tablas aun no funcionan
                     ExportBulkAction::make()->exports([
-                        ExcelExport::make('form')->fromForm()
+                        ExcelExport::make('form')
+                            ->fromForm()
                             ->withFilename('Timesheet_' . date('Y-m-d') . ' _export'),
-                        /*->withColumns([
-                                Column::make('User'),
-                                Column::make('created_at'),
-                                Column::make('deleted_at'),
-                            ]),*/
-                        ExcelExport::make('form2')->fromForm()
+                        // Opción 2: exportar múltiples registros usando la tabla.
+                        ExcelExport::make('Table')
+                            ->withColumns([
+                                Column::make('calendar.name')->heading('Calendar'),
+                                Column::make('user.id')->heading('User'),
+                                Column::make('type')->heading('Type'),
+                                Column::make('day_in')->heading('Day in'),
+                                Column::make('day_out')->heading('Day out'),
+                                Column::make('created_at')->heading('Created at'),
+                                Column::make('updated_at')->heading('Updated at'),
+                        ])
+                            ->withFilename('timesheets_table_' . now()->format('Y-m-d_His')),
+                        ExcelExport::make('Form personalizado')
+                            ->withColumns([
+                                Column::make('calendar.name')->heading('Calendar'),
+                                Column::make('user.id')->heading('User'),
+                                Column::make('type')->heading('Type'),
+                                Column::make('day_in')->heading('Day in'),
+                                Column::make('day_out')->heading('Day out'),
+                                Column::make('created_at')->heading('Created at'),
+                                Column::make('updated_at')->heading('Updated at'),
+                        ])
                             //permite seleccionar el tipo de archivo y el nombre de como se quiere exportar
                             ->askForFilename()
                             ->askForWriterType(),

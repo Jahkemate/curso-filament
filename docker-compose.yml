@@ -17,21 +17,18 @@ services:
       - "8080:8080"  # Puerto administrativo
     networks:
       - default
-      - dokploy-network
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=dokploy-network
-
 
   queue:
     build:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=120", "--sleep=1"]
+    command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=120", "--sleep=1",  "--max-time=3600"]
     depends_on:
-      - db
-      - redis
+       db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - storage_data:/app/storage
     networks:
@@ -40,6 +37,11 @@ services:
   redis:
     image: redis:7-alpine
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - default
 
@@ -56,6 +58,7 @@ services:
       - db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
       timeout: 5s
       retries: 10
       
@@ -65,8 +68,3 @@ services:
 volumes:
   db_data:
   storage_data:
-
-networks:
-  dokploy-network:
-    external: true
-    name: dokploy-network
